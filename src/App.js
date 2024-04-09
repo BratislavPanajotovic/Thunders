@@ -69,6 +69,14 @@ export default function App() {
           <h1>Thunders</h1>
         </div>
         <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button onClick={() => setMovies([...movies, ...tempMovieData])}>
+          Add Movie
+        </button>
+        <input
           className="search"
           type="text"
           placeholder="Search movies..."
