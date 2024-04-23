@@ -58,6 +58,7 @@ export default function StarRating({
     </div>
   );
 }
+
 function Star({ onRate, full, onHoverIn, onHoverOut, color, size }) {
   const starStyle = {
     width: `${size}px`,
