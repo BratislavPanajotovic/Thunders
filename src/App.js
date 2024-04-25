@@ -55,16 +55,28 @@ export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const query = "interstellar";
 
   useEffect(() => {
     async function fetchMovies() {
-      setIsLoading(true);
-      const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`
-      ).catch((error) => console.error("Error fetching data:", error));
-      const data = await res.json();
-      setMovies(data.Search);
-      setIsLoading(false);
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+        );
+        if (!res.ok) throw new Error("Could not fetch movies");
+
+        const data = await res.json();
+        if (data.response === "False") throw new Error("No movie found!");
+
+        setMovies(data.Search);
+      } catch (err) {
+        console.log(err);
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
     }
     fetchMovies();
   }, []);
@@ -75,23 +87,15 @@ export default function App() {
         <NumResult movies={movies} />
       </Navbar>
       <Main>
-        <Box element={isLoading ? <Loader /> : <MovieList movies={movies} />} />
-        <Box
-          element={
-            <>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />{" "}
-            </>
-          }
-        />
-
-        {/* <Box>
-          <MovieList movies={movies} />
+        <Box>
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
-        </Box> */}
+        </Box>
       </Main>
     </>
   );
@@ -100,7 +104,13 @@ export default function App() {
 function Loader() {
   return <p className="loader">Loading...</p>;
 }
-
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⛔</span>Error: {message}
+    </p>
+  );
+}
 function Navbar({ children }) {
   return (
     <nav className="nav-bar">
@@ -144,14 +154,14 @@ function Search() {
 function Main({ children }) {
   return <main className="main">{children} </main>;
 }
-function Box({ element }) {
+function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
   return (
     <div className="box">
       <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
         {isOpen ? "–" : "+"}
       </button>
-      {isOpen && element}
+      {isOpen && children}
     </div>
   );
 }
@@ -184,6 +194,7 @@ function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
   const avgRuntime = average(watched.map((movie) => movie.runtime));
+  console.log(watched);
   return (
     <div className="summary">
       <h2>Movies you watched</h2>
@@ -209,6 +220,7 @@ function WatchedSummary({ watched }) {
   );
 }
 function WatchedMoviesList({ watched }) {
+  console.log(watched);
   return (
     <ul className="list">
       {watched.map((movie) => (
@@ -217,6 +229,7 @@ function WatchedMoviesList({ watched }) {
     </ul>
   );
 }
+
 function WatchedMovie({ movie }) {
   return (
     <li>
