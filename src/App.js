@@ -52,8 +52,8 @@ const average = (arr) =>
 const KEY = "b5e0ac6e";
 
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
@@ -79,6 +79,13 @@ export default function App() {
         setIsLoading(false);
       }
     }
+
+    if (!query.length < 3) {
+      setMovies([]);
+      setError("");
+      return;
+    }
+
     fetchMovies();
   }, [query]);
   return (
@@ -129,8 +136,11 @@ function Logo() {
     </div>
   );
 }
-
 function NumResult({ movies }) {
+  if (!movies) {
+    return <p className="num-results">No results found</p>;
+  }
+
   return (
     <p className="num-results">
       Found <strong>{movies.length}</strong> results
