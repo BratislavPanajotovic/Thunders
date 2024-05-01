@@ -78,12 +78,14 @@ export default function App() {
   }
 
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchMovies() {
       try {
         setIsLoading(true);
         setError("");
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+          { signal: controller.signal }
         );
         if (!res.ok) throw new Error("Could not fetch movies");
 
@@ -105,6 +107,8 @@ export default function App() {
     }
 
     fetchMovies();
+
+    return () => controller.abort();
   }, [query]);
   return (
     <>
@@ -271,6 +275,10 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   useEffect(() => {
     if (!title) return;
     document.title = `${title}`;
+
+    return () => {
+      document.title = "⚡Thunders";
+    };
   }, [title]);
 
   useEffect(() => {
