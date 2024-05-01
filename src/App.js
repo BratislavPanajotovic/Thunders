@@ -240,7 +240,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   const isWatched = watched.map((movie) => movie.imdbID).includes(selectedId);
   const watchedUserrating = watched.find(
     (movie) => movie.imdbID === selectedId
-  ).userRating;
+  )?.userRating;
   const {
     Title: title,
     Year: year,
@@ -268,6 +268,10 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onAddWatched(newWatchedMovie);
     onCloseMovie();
   }
+  useEffect(() => {
+    if (!title) return;
+    document.title = `${title}`;
+  }, [title]);
 
   useEffect(() => {
     async function getMovieDetails() {
