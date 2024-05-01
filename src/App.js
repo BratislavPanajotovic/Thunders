@@ -93,8 +93,11 @@ export default function App() {
         if (data.response === "False") throw new Error("No movie found!");
 
         setMovies(data.Search);
+        setError("");
       } catch (err) {
-        setError(err.message);
+        if (err.name !== "AbortError") {
+          setError(err.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -272,6 +275,20 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onAddWatched(newWatchedMovie);
     onCloseMovie();
   }
+
+  useEffect(() => {
+    const handleEvent = (e) => {
+      if (e.code === "Escape") {
+        onCloseMovie();
+        console.log("closing");
+      }
+    };
+    document.addEventListener("keydown", handleEvent);
+    return () => {
+      document.removeEventListener("keydown", handleEvent);
+    };
+  }, [onCloseMovie]);
+
   useEffect(() => {
     if (!title) return;
     document.title = `${title}`;
